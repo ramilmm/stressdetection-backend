@@ -1,4 +1,4 @@
-package hello;
+package stressDetection.models;
 
 public class Template {
 

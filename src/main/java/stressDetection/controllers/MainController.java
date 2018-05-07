@@ -1,18 +1,19 @@
-package hello;
+package stressDetection.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import stressDetection.services.StressService;
 
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 @RestController
-public class HelloController {
+public class MainController {
 
     @Autowired
-    MainService mainService;
+    StressService stressService;
 
     ArrayList<Integer> hr = new ArrayList<>();
     ArrayList<Integer> gsr = new ArrayList<>();
@@ -21,14 +22,14 @@ public class HelloController {
 
     @GetMapping("/")
     public ArrayList index() {
-        mainService.buildTemplate();
+        stressService.findStress();
         return hr;
     }
 
     @GetMapping("/data/hr")
     @CrossOrigin
     public Integer sendHRData() {
-        if (i == 0) hr = mainService.generateHR();
+        if (i == 0) hr = stressService.generateHR();
         i++;
         return hr.get(i);
     }
@@ -36,7 +37,7 @@ public class HelloController {
     @GetMapping("/data/gsr")
     @CrossOrigin
     public Integer sendGSRData() {
-        if (j == 0) gsr = mainService.generateGSR();
+        if (j == 0) gsr = stressService.generateGSR();
         j++;
         return gsr.get(j);
     }

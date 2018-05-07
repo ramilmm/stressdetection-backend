@@ -1,12 +1,9 @@
-package hello;
-
-import java.util.Arrays;
+package stressDetection;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.ApplicationContext;
 
 @SpringBootApplication
 public class Application extends SpringBootServletInitializer {

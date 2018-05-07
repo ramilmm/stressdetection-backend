@@ -1,14 +1,15 @@
-package hello;
+package stressDetection.services;
 
 import org.springframework.stereotype.Service;
+import stressDetection.models.Template;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
-public class MainService {
+public class StressService {
+
+    TemplateService templateService = new TemplateService();
 
     ArrayList<Integer> hr, gsr;
 
@@ -16,7 +17,7 @@ public class MainService {
         ArrayList<Integer> hrArray = new ArrayList<>();
 
         for (int i = 0; i < 200; i++) {
-            hrArray.add(ThreadLocalRandom.current().nextInt(-5, 5 + 1) + 78);
+            hrArray.add(ThreadLocalRandom.current().nextInt(-3, 3 + 1) + 68);
         }
 
         for (int i = 0; i < 100; i++) {
@@ -96,75 +97,67 @@ public class MainService {
         return gsrArray;
     }
 
-    public Template buildTemplate() {
-        Template t = new Template();
+    public void findStress() {
+        int stressLevel = 0;
+
         hr = generateHR();
         gsr = generateGSR();
-        int i = 0;
 
-        ArrayList<Integer> hrAv = new ArrayList<>();
-        ArrayList<Integer> gsrAv = new ArrayList<>();
+        Template template = templateService.buildTemplate(hr,gsr);
 
-        long start = System.currentTimeMillis();
-        while (System.currentTimeMillis() - start < 20000) {
-            hrAv.add(hr.get(i));
-            gsrAv.add(gsr.get(i));
-            i++;
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+
+        for (int i = 0; i < hr.size(); i++) {
+
+            double hrVal = hr.get(i);
+            double gsrVal = gsr.get(i);
+
+            double percentage = getPercent(hrVal, template.getHrAverage() + template.getHrDispersion());
+
+            stressLevel += checkHRStress(percentage);
+
+            percentage = getPercent(gsrVal, template.getGsrAverage() + template.getGsrDispersion());
+
+            stressLevel += checkGSRStress(percentage);
+
+            System.out.println(stressLevel);
+            stressLevel = 0;
+
         }
 
-        t.setHrAverage(getAverage(hrAv));
-        t.setGsrAverage(getAverage(gsrAv));
-        t.setHrDispersion(getDispersion(hrAv));
-        t.setGsrDispersion(getDispersion(gsrAv));
-
-        System.out.println(t);
-
-        return t;
     }
 
-    public Integer getAverage(ArrayList<Integer> list){
-        int sum = 0;
+    private int checkHRStress(double percentage) {
+        if (percentage > 10 && percentage < 29) {
+            return 1;
+        }else if (percentage > 29 && percentage < 50 ) {
+            return  2;
+        }else if (percentage > 50 && percentage < 71) {
+            return  3;
+        }else if (percentage > 71 && percentage < 100) {
+            return  4;
+        }else if (percentage > 100) {
+            return  5;
+        }else return 0;
 
-        for (int j = 0; j < list.size(); j++) {
-            sum += list.get(j);
-        }
-        return sum/list.size();
     }
 
-    public Double getDispersion(ArrayList<Integer> list) {
-        Double dispersion;
-        Map<Integer, Double> map = new HashMap<>();
+    private int checkGSRStress(double percentage) {
+        if (percentage > 10 && percentage < 100) {
+            return 1;
+        }else if (percentage > 100 && percentage < 170 ) {
+            return  2;
+        }else if (percentage > 170 && percentage < 250) {
+            return  3;
+        }else if (percentage > 250 && percentage < 330) {
+            return  4;
+        }else if (percentage > 330) {
+            return  5;
+        }else return 0;
 
-        for (int i = 0; i < list.size(); i++) {
-            int item = list.get(i);
-            if (map.containsKey(item)) {
-                Double count = map.remove(item);
-                count += 1*1.0/list.size();
-                map.put(item, count);
-            }else {
-                map.put(item, 1*1.0/list.size());
-            }
+    }
 
-        }
-
-        double expectedValue = 0.0;
-        for (Map.Entry<Integer, Double> pair: map.entrySet()) {
-            expectedValue += pair.getKey() * pair.getValue();
-        }
-
-        double expectedValue2 = 0.0;
-        for (Map.Entry<Integer, Double> pair: map.entrySet()) {
-            expectedValue2 += Math.pow(pair.getKey(), 2) * pair.getValue();
-        }
-
-        dispersion = expectedValue2 - Math.pow(expectedValue, 2);
-
-        return dispersion;
+    private double getPercent(Double current, Double template) {
+        return ((current*100)/template) - 100;
     }
 
 }
