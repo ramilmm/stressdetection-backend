@@ -11,7 +11,7 @@ public class StressService {
 
     TemplateService templateService = new TemplateService();
 
-    ArrayList<Integer> hr, gsr;
+    Template template;
 
     public ArrayList<Integer> generateHR() {
         ArrayList<Integer> hrArray = new ArrayList<>();
@@ -29,7 +29,7 @@ public class StressService {
         }
 
         for (int i = 0; i < 100; i++) {
-            hrArray.add(ThreadLocalRandom.current().nextInt(-10, 10 + 1) + 150);
+            hrArray.add(ThreadLocalRandom.current().nextInt(-10, 10 + 1) + 160);
         }
 
         for (int i = 0; i < 100; i++) {
@@ -71,7 +71,7 @@ public class StressService {
         }
 
         for (int i = 0; i < 100; i++) {
-            gsrArray.add(ThreadLocalRandom.current().nextInt(-3, 3 + 1) + 25);
+            gsrArray.add(ThreadLocalRandom.current().nextInt(-3, 3 + 1) + 35);
         }
 
         for (int i = 0; i < 100; i++) {
@@ -97,67 +97,64 @@ public class StressService {
         return gsrArray;
     }
 
-    public void findStress() {
+    public void initTemplate(ArrayList<Integer> hr, ArrayList<Integer> gsr) {
+        template = templateService.buildTemplate(hr, gsr);
+    }
+
+    public int findStress(ArrayList<Integer> hr, ArrayList<Integer> gsr, Integer i) {
+
+        double hrVal = hr.get(i);
+        double gsrVal = gsr.get(i);
+
+        return getStressLevel(template, hrVal, gsrVal);
+    }
+
+    private int getStressLevel(Template template, double hrVal, double gsrVal) {
         int stressLevel = 0;
+        double percentage = getPercent(hrVal, template.getHrAverage() + template.getHrDispersion());
 
-        hr = generateHR();
-        gsr = generateGSR();
+        stressLevel += checkHRStress(percentage);
 
-        Template template = templateService.buildTemplate(hr,gsr);
+        percentage = getPercent(gsrVal, template.getGsrAverage() + template.getGsrDispersion());
 
+        stressLevel += checkGSRStress(percentage);
 
-        for (int i = 0; i < hr.size(); i++) {
-
-            double hrVal = hr.get(i);
-            double gsrVal = gsr.get(i);
-
-            double percentage = getPercent(hrVal, template.getHrAverage() + template.getHrDispersion());
-
-            stressLevel += checkHRStress(percentage);
-
-            percentage = getPercent(gsrVal, template.getGsrAverage() + template.getGsrDispersion());
-
-            stressLevel += checkGSRStress(percentage);
-
-            System.out.println(stressLevel);
-            stressLevel = 0;
-
-        }
+        return stressLevel;
 
     }
 
     private int checkHRStress(double percentage) {
-        if (percentage > 10 && percentage < 29) {
+        if (percentage >= 10 && percentage < 29) {
             return 1;
-        }else if (percentage > 29 && percentage < 50 ) {
-            return  2;
-        }else if (percentage > 50 && percentage < 71) {
-            return  3;
-        }else if (percentage > 71 && percentage < 100) {
-            return  4;
-        }else if (percentage > 100) {
-            return  5;
-        }else return 0;
+        } else if (percentage >= 29 && percentage < 50) {
+            return 2;
+        } else if (percentage >= 50 && percentage < 71) {
+            return 3;
+        } else if (percentage >= 71 && percentage < 120) {
+            return 4;
+        } else if (percentage >= 120) {
+            return 5;
+        } else return 0;
 
     }
 
     private int checkGSRStress(double percentage) {
-        if (percentage > 10 && percentage < 100) {
+        if (percentage >= 20 && percentage < 100) {
             return 1;
-        }else if (percentage > 100 && percentage < 170 ) {
-            return  2;
-        }else if (percentage > 170 && percentage < 250) {
-            return  3;
-        }else if (percentage > 250 && percentage < 330) {
-            return  4;
-        }else if (percentage > 330) {
-            return  5;
-        }else return 0;
+        } else if (percentage >= 100 && percentage < 170) {
+            return 2;
+        } else if (percentage >= 170 && percentage < 250) {
+            return 3;
+        } else if (percentage >= 250 && percentage < 330) {
+            return 4;
+        } else if (percentage >= 330) {
+            return 5;
+        } else return 0;
 
     }
 
     private double getPercent(Double current, Double template) {
-        return ((current*100)/template) - 100;
+        return ((current * 100) / template) - 100;
     }
 
 }

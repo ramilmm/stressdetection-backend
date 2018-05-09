@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import stressDetection.services.StressService;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -17,19 +18,25 @@ public class MainController {
 
     ArrayList<Integer> hr = new ArrayList<>();
     ArrayList<Integer> gsr = new ArrayList<>();
-    int i = 0,j = 0;
+    int i = 0,j = 0, readyToCheck = 0;
 
 
-    @GetMapping("/")
-    public ArrayList index() {
-        stressService.findStress();
-        return hr;
+    @PostConstruct
+    public void init() {
+        hr = stressService.generateHR();
+        gsr = stressService.generateGSR();
+    }
+
+    @GetMapping("/template")
+    @CrossOrigin
+    public void initTemplate() {
+        stressService.initTemplate(hr, gsr);
+        readyToCheck = 1;
     }
 
     @GetMapping("/data/hr")
     @CrossOrigin
     public Integer sendHRData() {
-        if (i == 0) hr = stressService.generateHR();
         i++;
         return hr.get(i);
     }
@@ -37,7 +44,6 @@ public class MainController {
     @GetMapping("/data/gsr")
     @CrossOrigin
     public Integer sendGSRData() {
-        if (j == 0) gsr = stressService.generateGSR();
         j++;
         return gsr.get(j);
     }
@@ -45,7 +51,9 @@ public class MainController {
     @GetMapping("/data/stress")
     @CrossOrigin
     public Integer sendStressData() {
-        return ThreadLocalRandom.current().nextInt(1, 5 + 1);
+        if (readyToCheck == 1) {
+            return stressService    .findStress(hr, gsr, (i - 1));
+        }else return 0;
     }
 
     
