@@ -12,27 +12,14 @@ public class TemplateService {
 
     public Template buildTemplate(ArrayList<Integer> hr, ArrayList<Integer> gsr) {
         Template t = new Template();
-        int i = 0;
 
-        ArrayList<Integer> hrAv = new ArrayList<>();
-        ArrayList<Integer> gsrAv = new ArrayList<>();
+        System.out.println(hr);
+        System.out.println(gsr);
 
-        long start = System.currentTimeMillis();
-        while (System.currentTimeMillis() - start < 20000) {
-            hrAv.add(hr.get(i));
-            gsrAv.add(gsr.get(i));
-            i++;
-            try {
-                Thread.sleep(300);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        t.setHrAverage(getAverage(hrAv));
-        t.setGsrAverage(getAverage(gsrAv));
-        t.setHrDispersion(getDispersion(hrAv));
-        t.setGsrDispersion(getDispersion(gsrAv));
+        t.setHrAverage(getAverage(hr));
+        t.setGsrAverage(getAverage(gsr));
+        t.setHrDispersion(getDispersion(hr));
+        t.setGsrDispersion(getDispersion(gsr));
 
         System.out.println(t);
 

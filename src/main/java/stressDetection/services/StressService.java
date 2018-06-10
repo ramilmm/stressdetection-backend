@@ -9,6 +9,11 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class StressService {
 
+    private Integer hr = 0;
+    private Integer gsr = 0;
+
+    private Boolean readyToCheck = false;
+
     TemplateService templateService = new TemplateService();
 
     Template template;
@@ -99,14 +104,14 @@ public class StressService {
 
     public void initTemplate(ArrayList<Integer> hr, ArrayList<Integer> gsr) {
         template = templateService.buildTemplate(hr, gsr);
+        readyToCheck = true;
     }
 
-    public int findStress(ArrayList<Integer> hr, ArrayList<Integer> gsr, Integer i) {
+    public int findStress() {
 
-        double hrVal = hr.get(i);
-        double gsrVal = gsr.get(i);
-
-        return getStressLevel(template, hrVal, gsrVal);
+        if (readyToCheck) {
+            return getStressLevel(template, hr, gsr);
+        }else return 0;
     }
 
     private int getStressLevel(Template template, double hrVal, double gsrVal) {
@@ -115,7 +120,7 @@ public class StressService {
 
         stressLevel += checkHRStress(percentage);
 
-        percentage = getPercent(gsrVal, template.getGsrAverage() + template.getGsrDispersion());
+        percentage = getPercent(gsrVal, template.getGsrAverage() - template.getGsrDispersion());
 
         stressLevel += checkGSRStress(percentage);
 
@@ -124,7 +129,7 @@ public class StressService {
     }
 
     private int checkHRStress(double percentage) {
-        if (percentage >= 10 && percentage < 29) {
+        if (percentage >= 1 && percentage < 5) {
             return 1;
         } else if (percentage >= 29 && percentage < 50) {
             return 2;
@@ -139,15 +144,15 @@ public class StressService {
     }
 
     private int checkGSRStress(double percentage) {
-        if (percentage >= 20 && percentage < 100) {
+        if (percentage <= -2 && percentage > -5) {
             return 1;
-        } else if (percentage >= 100 && percentage < 170) {
+        } else if (percentage <= -5 && percentage > -10) {
             return 2;
-        } else if (percentage >= 170 && percentage < 250) {
+        } else if (percentage <= -10 && percentage > -20) {
             return 3;
-        } else if (percentage >= 250 && percentage < 330) {
+        } else if (percentage <= -20 && percentage > -30) {
             return 4;
-        } else if (percentage >= 330) {
+        } else if (percentage <= -30) {
             return 5;
         } else return 0;
 
@@ -157,4 +162,23 @@ public class StressService {
         return ((current * 100) / template) - 100;
     }
 
+    public Template getTemplate() {
+        return template;
+    }
+
+    public Integer getHr() {
+        return hr;
+    }
+
+    public void setHr(Integer hr) {
+        this.hr = hr;
+    }
+
+    public Integer getGsr() {
+        return gsr;
+    }
+
+    public void setGsr(Integer gsr) {
+        this.gsr = gsr;
+    }
 }
